@@ -4,3 +4,7 @@
 bpython
 ipython
 hupper
+aiohttp
+asyncpg
+aioredis
+cerberus

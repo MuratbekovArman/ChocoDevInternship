@@ -4,9 +4,13 @@ x-environment-vars: &environment-vars
   PYTHONUNBUFFERED: 1
   PYTHONIOENCODING: utf-8
   TERM: linux
+  DATABASE_URL: postgres://postgres:password@internship-db:5432/test?sslmode=disable
+  REDIS_URL: redis://default:password@internship-redis:6379
+
+
 
 services:
-    sample-web-service:
+    internship-web:
         build:
             context: .
             dockerfile: ./docker/Dockerfile.local
@@ -14,8 +18,32 @@ services:
             <<: *environment-vars
         ports:
             - "8000:8000"
+        depends_on:
+            - internship-db
         volumes:
             - .:/proj
         command: python -m code.app
         stdin_open: true
         tty: true
+
+    internship-db:
+        image: postgres:14.1-alpine
+        ports:
+          - "5432:5432"
+        environment:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test
+
+    internship-redis:
+      image: redis:7.0-rc1-alpine
+      ports:
+        - "6379:6379"
+      environment:
+        REDIS_PASSWORD: password
+
+
+networks:
+   default:
+       external:
+           name: aviata-platform
+
