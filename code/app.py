@@ -1,88 +1,106 @@
-from sanic import Sanic, response
-
+import asyncio
 import asyncpg
 import aioredis
 import json
+import uuid
 
-import code.services.aio_client as aio_client
-import code.services.pg_client as pg_client
-import code.settings as settings
-import code.services.validator as validator
+from datetime import datetime
+# from cerberus.errors import ValidationError
+from sanic import Sanic, response
+from .services import http_client, database, validator
+from . import settings
+
 
 app = Sanic('internship-web')
+
+amadeus = 'Amadeus'
+sabre = 'Sabre'
 
 
 @app.post('/search')
 async def search(request):
+    redis = request.app.ctx.redis
     body = request.json
-    headers = {'content-type': 'application/json',
-               'accept': 'application/json'}
-    results = await aio_client.post_search(headers, body)
-
-    a_id, s_id = results[0]['search_id'], results[1]['search_id']
-    a_items, s_items = results[0]['items'], results[1]['items']
-    await request.app.ctx.redis.set(a_id, json.dumps(a_items))
-    await request.app.ctx.redis.set(s_id, json.dumps(s_items))
-
-    return response.json(results)
+    if validator.search_body_validated(body):
+        id = str(uuid.uuid4())
+        await redis.set(id, "", ex=1200)
+        await asyncio.gather(http_client.search_in_provider(amadeus, body, redis, id),
+                             http_client.search_in_provider(sabre, body, redis, id))
+        return response.json({"id": id})
+    else:
+        return response.json({
+            'msg': 'Incorrect information passed!'
+        })
 
 
 @app.get('/search/<search_id>')
 async def search_details(request, search_id):
-    data = await request.app.ctx.redis.get(search_id)
-    data = json.loads(data)
-    return response.json(data)
+    search_results = await request.app.ctx.redis.get(search_id)
+    search_results = json.loads(search_results)
+    search_results['items'] = json.loads(search_results['items'])
+    return response.json(search_results)
 
 
 @app.get('/offers/<search_id>/<offer_id>')
-async def offer_detail(request, search_id,  offer_id):
-    data = await request.app.ctx.redis.get(search_id)
-    data = json.loads(data)
-    for item in data:
-        if item['id'] == offer_id:
-            return response.json(item)
-    return response.json({"msg": "Offer not found!"})
+async def offer_detail(request, search_id, offer_id):
+    search_results = await request.app.ctx.redis.get(search_id)
+    search_results = json.loads(search_results)
+    search_results['items'] = json.loads(search_results['items'])
+    try:
+        offer = next(item for item in search_results['items'] if item['id'] == offer_id)
+        return response.json(offer)
+    except StopIteration:
+        return response.json({'msg': 'offer not found'})
 
 
+# after inserting field "expires_at" it changes
+# from "2022-03-06T00:41:10.834617+06:00" to "2022-03-05T18:41:10.834617+00:00"
 @app.post('/booking')
 async def booking(request):
     body = request.json
-    headers = {'content-type': 'application/json',
-               'accept': 'application/json'}
     if validator.validated(body):
-        result = await aio_client.booking(headers, body)
-
-        async with request.app.ctx.db_pool.acquire() as conn:
-            await conn.execute('''INSERT INTO bookings VALUES ($1, $2, $3, $4, $5, $6, $7)''',
-                               result["id"], result["pnr"], result["expires_at"],
-                               result["phone"], result["email"], json.dumps(result["offer"]),
-                               json.dumps(result["passengers"]))
-        return response.json(result)
+        result = await http_client.booking(body)
+        status = await database.insert_bookings(request.app.ctx.db_pool, uuid.UUID(result['id']), result['pnr'],
+                                                datetime.fromisoformat(result['expires_at']),
+                                                result['phone'], result['email'],
+                                                json.dumps(result['offer']),
+                                                json.dumps(result['passengers']))
+    return response.json(result)
 
 
 @app.get('/booking/<booking_id>')
 async def booking_detail(request, booking_id):
-    result = await pg_client.get_booking(request, booking_id)
+    db_pool = request.app.ctx.db_pool
+    result = await database.get_booking(db_pool, booking_id)
     return response.json(result)
 
 
 @app.get('/booking')
 async def booking_search(request):
-    keys, values = list(request.args.keys()), list(request.args.values())
-    if 'email' in keys:
-        data = await pg_client.get_booking_by_args(request, values[0][0], values[1][0])
-    elif 'page' in keys:
-        data = await pg_client.get_bookings_limit(request, values[0][0], values[1][0])
+    db_pool = request.app.ctx.db_pool
+    email, phone = request.args.get('email'), request.args.get('phone')
+    page, limit = request.args.get('page'), request.args.get('limit')
+
+    if email and phone:
+        data = await database.get_booking_by_email_and_phone(db_pool, email, phone.replace(' ', '+'))
+    elif page and limit:
+        data = await database.get_bookings_by_limit(db_pool, page, limit)
+    else:
+        # raise ValidationError('Incorrect set of parameters')
+        return response.json({
+            'msg': 'Incorrect set of parameters'
+        })
+
     return response.json(data)
 
 
-@app.listener("before_server_start")
+@app.listener('before_server_start')
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
 
 
-@app.listener("after_server_stop")
+@app.listener('after_server_stop')
 async def cleanup(app, loop):
     await app.ctx.redis.close()
 

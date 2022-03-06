@@ -1,1 +1,9 @@
 sanic==21.*
+bpython
+ipython
+hupper
+aiohttp
+asyncpg
+aioredis
+cerberus
+pytest

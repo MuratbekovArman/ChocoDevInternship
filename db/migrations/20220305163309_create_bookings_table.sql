@@ -1,8 +1,10 @@
 -- migrate:up
+set time zone 'Asia/Almaty';
+
 create table if not exists bookings(
-    id varchar(36) primary key,
-    pnr varchar (6),
-    expires_at varchar (50),
+    id uuid primary key,
+    pnr varchar (10),
+    expires_at timestamptz,
     phone varchar (12),
     email varchar (30),
     offer json not null,

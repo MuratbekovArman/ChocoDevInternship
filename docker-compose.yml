@@ -7,8 +7,6 @@ x-environment-vars: &environment-vars
   DATABASE_URL: postgres://postgres:password@internship-db:5432/test?sslmode=disable
   REDIS_URL: redis://default:password@internship-redis:6379
 
-
-
 services:
     internship-web:
         build:
@@ -41,9 +39,7 @@ services:
       environment:
         REDIS_PASSWORD: password
 
-
 networks:
    default:
        external:
            name: aviata-platform
-

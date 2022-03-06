@@ -1,24 +1,29 @@
-import cerberus
 from cerberus import Validator
 
-# schema = {'id': {'type': 'string'},
-#           'pnr': {'type': 'string'},
-#           'expires_at': {'type': 'datetime'},
-#           'phone': {'type': 'string'},
-#           'email': {'type': 'string'},
-#           'offer': {'type': 'dict'},
-#           'passengers': {'type': ['dict', 'list']}}
 
-schema = {'offer_id': {'type': 'string'},
-          'phone': {'type': 'string'},
-          'email': {'type': 'string'},
-          'passengers': {'type': ['dict', 'list']}}
+booking_body_schema = {'offer_id': {'type': 'string'},
+                       'phone': {'type': 'string'},
+                       'email': {'type': 'string'},
+                       'passengers': {'type': ['dict', 'list']}}
 
-v = Validator(schema)
+search_body_schema = {"cabin": {'type': 'string', 'allowed': ['Economy', 'Business']},
+                      "origin": {'type': 'string', 'minlength': 3, 'maxlength': 3},
+                      "destination": {'type': 'string', 'minlength': 3, 'maxlength': 3},
+                      "dep_at": {'type': 'string'},
+                      "arr_at": {'type': 'string'},
+                      "adults": {'type': 'integer'},
+                      "children": {'type': 'integer'},
+                      "infants": {'type': 'integer'},
+                      "currency": {'type': 'string'}
+                      }
 
 
-def validated(data):
+def booking_body_validated(data):
+    v = Validator(booking_body_schema)
     return v.validate(data)
 
 
-print(str('abc'))
+def search_body_validated(data):
+    v = Validator(search_body_schema)
+    return v.validate(data)
+
