@@ -49,17 +49,19 @@ async def search_details(request, search_id):
 
 @app.get('/offers/<offer_id>')
 async def offer_detail(request, offer_id):
-    redis = request.app.ctx.redis
-    search_keys = await redis.keys()
-    for key in search_keys:
-        search_results = await redis.get(key)
-        search_results = json.loads(search_results)
-        if 'items' in search_results:
-            search_results['items'] = json.loads(search_results['items'])
-            for item in search_results['items']:
-                if item['id'] == offer_id:
-                    return response.json(item)
-    raise NotFound('Offer not found')
+    if validator.is_valid_uuid(offer_id):
+        redis = request.app.ctx.redis
+        search_keys = await redis.keys()
+        for key in search_keys:
+            if search_results := await redis.get(key):
+                search_results = json.loads(search_results)
+                if 'items' in search_results:
+                    search_results['items'] = json.loads(search_results['items'])
+                    for item in search_results['items']:
+                        if item['id'] == offer_id:
+                            return response.json(item)
+        raise NotFound('Offer not found')
+    raise ValidationError('Invalid offer_id!')
 
 
 # after inserting field "expires_at" it changes
