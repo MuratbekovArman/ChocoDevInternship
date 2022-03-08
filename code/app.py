@@ -21,21 +21,24 @@ sabre = 'Sabre'
 @app.post('/search')
 async def search(request):
     redis = request.app.ctx.redis
-    body = request.json
-    if validator.search_body_validated(body):
-        id = str(uuid.uuid4())
-        await redis.set(id, "", ex=1200)
-        await asyncio.gather(http_client.search_in_provider(amadeus, body, redis, id),
-                             http_client.search_in_provider(sabre, body, redis, id))
-        return response.json({"id": id})
-    else:
-        raise ValidationError('Incorrect information passed!')
+    if body := request.json:
+
+        if validator.search_body_validated(body):
+            id = str(uuid.uuid4())
+            await redis.set(id, "", ex=1200)
+            await asyncio.gather(http_client.search_in_provider(amadeus, body, redis, id),
+                                 http_client.search_in_provider(sabre, body, redis, id))
+            return response.json({"id": id})
+        else:
+            raise ValidationError('Incorrect information passed!')
+    raise ValidationError('Missing body of the request!')
 
 
 @app.get('/search/<search_id>')
 async def search_details(request, search_id):
+    redis = request.app.ctx.redis
     if validator.is_valid_uuid(search_id):
-        if search_results := await request.app.ctx.redis.get(search_id):
+        if search_results := await redis.get(search_id):
             search_results = json.loads(search_results)
             search_results['items'] = json.loads(search_results['items'])
             return response.json(search_results)

@@ -18,7 +18,6 @@ def fake_uuid():
 @fixture()
 def fake_search_body():
     return {
-        "provider": "Amadeus",
         "cabin": "Economy",
         "origin": "ALA",
         "destination": "NQZ",

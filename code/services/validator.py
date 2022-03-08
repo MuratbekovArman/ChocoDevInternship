@@ -17,6 +17,8 @@ search_body_schema = {"cabin": {'type': 'string', 'allowed': ['Economy', 'Busine
                       "currency": {'type': 'string'}
                       }
 
+search_response_schema = {}
+
 
 def booking_body_validated(data):
     v = Validator(booking_body_schema)

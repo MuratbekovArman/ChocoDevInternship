@@ -74,11 +74,11 @@ def __change_currencies(items, rates, search_currency):
         if item_cur != search_currency:
             if item_cur == 'KZT':
                 item['price']['amount'] = round(item_amount
-                                                / round(float(rates.get(search_currency))))
+                                                / float(rates.get(search_currency)))
             elif search_currency == 'KZT':
                 item['price']['amount'] = item_amount * round(float(rates.get(item_cur)))
             else:
-                item['price']['amount'] = round((item_amount * round(float(rates.get(item_cur))))
-                                                / round(float(rates.get(search_currency))))
+                item['price']['amount'] = round((item_amount * float(rates.get(item_cur)))
+                                                / float(rates.get(search_currency)))
             item['price']['currency'] = search_currency
     return items
