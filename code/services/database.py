@@ -26,7 +26,8 @@ async def get_bookings_by_limit(db_pool, page, limit):
 
 async def insert_bookings(db_pool, *args):
     async with db_pool.acquire() as conn:
-        status = await conn.execute('''INSERT INTO bookings VALUES ($1, $2, $3, $4, $5, $6, $7)''', *args)
+        status = await conn.execute('''INSERT INTO bookings VALUES ($1, $2, $3, $4, $5, $6, $7)''',
+                                    *args)
         return status
 
 

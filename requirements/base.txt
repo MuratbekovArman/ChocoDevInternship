@@ -7,3 +7,9 @@ asyncpg
 aioredis
 cerberus
 pytest
+pytest-pythonpath
+pytest-cov
+xmltodict
+sanic_scheduler
+sanic-testing
+pytest-mock

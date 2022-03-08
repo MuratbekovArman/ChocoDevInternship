@@ -3,15 +3,16 @@ import asyncpg
 import aioredis
 import json
 import uuid
-
-from datetime import datetime
-# from cerberus.errors import ValidationError
+from datetime import datetime, date, timedelta
+from sanic.exceptions import NotFound, ServerError
+from sanic_scheduler import SanicScheduler, task
+from .exceptions import ValidationError
 from sanic import Sanic, response
 from .services import http_client, database, validator
 from . import settings
 
-
 app = Sanic('internship-web')
+scheduler = SanicScheduler(app)
 
 amadeus = 'Amadeus'
 sabre = 'Sabre'
@@ -28,29 +29,34 @@ async def search(request):
                              http_client.search_in_provider(sabre, body, redis, id))
         return response.json({"id": id})
     else:
-        return response.json({
-            'msg': 'Incorrect information passed!'
-        })
+        raise ValidationError('Incorrect information passed!')
 
 
 @app.get('/search/<search_id>')
 async def search_details(request, search_id):
-    search_results = await request.app.ctx.redis.get(search_id)
-    search_results = json.loads(search_results)
-    search_results['items'] = json.loads(search_results['items'])
-    return response.json(search_results)
+    if validator.is_valid_uuid(search_id):
+        if search_results := await request.app.ctx.redis.get(search_id):
+            search_results = json.loads(search_results)
+            search_results['items'] = json.loads(search_results['items'])
+            return response.json(search_results)
+
+        raise NotFound('Search items not found!')
+    raise ValidationError('Search_id is invalid!')
 
 
-@app.get('/offers/<search_id>/<offer_id>')
-async def offer_detail(request, search_id, offer_id):
-    search_results = await request.app.ctx.redis.get(search_id)
-    search_results = json.loads(search_results)
-    search_results['items'] = json.loads(search_results['items'])
-    try:
-        offer = next(item for item in search_results['items'] if item['id'] == offer_id)
-        return response.json(offer)
-    except StopIteration:
-        return response.json({'msg': 'offer not found'})
+@app.get('/offers/<offer_id>')
+async def offer_detail(request, offer_id):
+    redis = request.app.ctx.redis
+    search_keys = await redis.keys()
+    for key in search_keys:
+        search_results = await redis.get(key)
+        search_results = json.loads(search_results)
+        if 'items' in search_results:
+            search_results['items'] = json.loads(search_results['items'])
+            for item in search_results['items']:
+                if item['id'] == offer_id:
+                    return response.json(item)
+    raise NotFound('Offer not found')
 
 
 # after inserting field "expires_at" it changes
@@ -58,21 +64,27 @@ async def offer_detail(request, search_id, offer_id):
 @app.post('/booking')
 async def booking(request):
     body = request.json
-    if validator.validated(body):
-        result = await http_client.booking(body)
-        status = await database.insert_bookings(request.app.ctx.db_pool, uuid.UUID(result['id']), result['pnr'],
-                                                datetime.fromisoformat(result['expires_at']),
-                                                result['phone'], result['email'],
-                                                json.dumps(result['offer']),
-                                                json.dumps(result['passengers']))
-    return response.json(result)
+    if validator.booking_body_validated(body):
+        if result := await http_client.booking(body):
+            await database.insert_bookings(request.app.ctx.db_pool,
+                                           uuid.UUID(result['id']), result['pnr'],
+                                           datetime.fromisoformat(result['expires_at']),
+                                           result['phone'], result['email'],
+                                           json.dumps(result['offer']),
+                                           json.dumps(result['passengers']))
+            return response.json(result)
+        else:
+            raise ServerError('Insert failed!')
+    else:
+        raise ValidationError('Incorrect information passed!')
 
 
 @app.get('/booking/<booking_id>')
 async def booking_detail(request, booking_id):
     db_pool = request.app.ctx.db_pool
-    result = await database.get_booking(db_pool, booking_id)
-    return response.json(result)
+    if result := await database.get_booking(db_pool, booking_id):
+        return response.json(result)
+    raise NotFound('Booking not found')
 
 
 @app.get('/booking')
@@ -82,22 +94,45 @@ async def booking_search(request):
     page, limit = request.args.get('page'), request.args.get('limit')
 
     if email and phone:
-        data = await database.get_booking_by_email_and_phone(db_pool, email, phone.replace(' ', '+'))
+        data = await database.get_booking_by_email_and_phone(db_pool,
+                                                             email, phone.replace(' ', '+'))
     elif page and limit:
         data = await database.get_bookings_by_limit(db_pool, page, limit)
     else:
-        # raise ValidationError('Incorrect set of parameters')
-        return response.json({
-            'msg': 'Incorrect set of parameters'
-        })
+        raise ValidationError('Incorrect set of parameters')
 
     return response.json(data)
+
+
+# needs to be reconfigured on updating at 12:00. Should I calculate delay manually?
+@task(timedelta(hours=24))
+async def get_rates(app):
+    dt = date.today()
+
+    redis = app.ctx.redis
+    if rates := await redis.get(f'currency_rates:{dt.isoformat()}'):
+        return response.json({
+            'date': dt.isoformat(),
+            'rates': json.loads(rates)
+        })
+
+    rates = await http_client.get_rates()
+    await redis.set(f'currency_rates:{dt.isoformat()}', json.dumps(rates), ex=24 * 60 * 60)
+
+    return response.json({
+        'date': dt.isoformat(),
+        'rates': rates
+    })
+
+
+app.add_task(get_rates(app))
 
 
 @app.listener('before_server_start')
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
-    app.ctx.redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
+    app.ctx.redis = aioredis.from_url(settings.REDIS_URL,
+                                      decode_responses=True, max_connections=50)
 
 
 @app.listener('after_server_stop')
@@ -107,3 +142,4 @@ async def cleanup(app, loop):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
+    app.config.FALLBACK_ERROR_FORMAT = 'json'

@@ -1,5 +1,5 @@
 from cerberus import Validator
-
+import uuid
 
 booking_body_schema = {'offer_id': {'type': 'string'},
                        'phone': {'type': 'string'},
@@ -20,10 +20,17 @@ search_body_schema = {"cabin": {'type': 'string', 'allowed': ['Economy', 'Busine
 
 def booking_body_validated(data):
     v = Validator(booking_body_schema)
-    return v.validate(data)
+    return v.validate(data) and is_valid_uuid(data.get('offer_id'))
 
 
 def search_body_validated(data):
     v = Validator(search_body_schema)
     return v.validate(data)
 
+
+def is_valid_uuid(val):
+    try:
+        uuid.UUID(str(val))
+        return True
+    except ValueError:
+        return False
