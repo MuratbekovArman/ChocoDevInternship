@@ -1,0 +1,135 @@
+{
+  "search_id": "-7747716321390157016",
+  "count": 20,
+  "items": [
+    {
+      "id": "b2c627fc-2d41-41a6-a828-b32ffa9a3443",
+      "flights": [
+        {
+          "duration": 20700,
+          "segments": [
+            {
+              "operating_airline": "KC",
+              "flight_number": "755",
+              "equipment": "Boeing 777-200",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-27T03:50:00+06:00",
+                "airport": {
+                  "code": "ALA",
+                  "name": "Алматы"
+                },
+                "terminal": "4"
+              },
+              "arr": {
+                "at": "2022-03-27T09:10:00+06:00",
+                "airport": {
+                  "code": "HRC",
+                  "name": "Жайрем"
+                },
+                "terminal": "4"
+              },
+              "baggage": null
+            },
+            {
+              "operating_airline": "KC",
+              "flight_number": "551",
+              "equipment": "Boeing 727-200 Adv.",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-27T12:30:00+06:00",
+                "airport": {
+                  "code": "HRC",
+                  "name": "Жайрем"
+                },
+                "terminal": "5"
+              },
+              "arr": {
+                "at": "2022-03-27T12:55:00+06:00",
+                "airport": {
+                  "code": "NQZ",
+                  "name": "Нур-Султан (Астана)"
+                },
+                "terminal": null
+              },
+              "baggage": null
+            }
+          ]
+        },
+        {
+          "duration": 5400,
+          "segments": [
+            {
+              "operating_airline": "KC",
+              "flight_number": "633",
+              "equipment": "Boeing 767-300 Freighter",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-28T03:05:00+06:00",
+                "airport": {
+                  "code": "NQZ",
+                  "name": "Нур-Султан (Астана)"
+                },
+                "terminal": "2"
+              },
+              "arr": {
+                "at": "2022-03-28T03:20:00+05:00",
+                "airport": {
+                  "code": "URA",
+                  "name": "Уральск"
+                },
+                "terminal": null
+              },
+              "baggage": null
+            },
+            {
+              "operating_airline": "KC",
+              "flight_number": "956",
+              "equipment": "Boeing 747-300",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-28T07:00:00+05:00",
+                "airport": {
+                  "code": "URA",
+                  "name": "Уральск"
+                },
+                "terminal": "7"
+              },
+              "arr": {
+                "at": "2022-03-28T08:15:00+06:00",
+                "airport": {
+                  "code": "ALA",
+                  "name": "Алматы"
+                },
+                "terminal": "9"
+              },
+              "baggage": null
+            }
+          ]
+        }
+      ],
+      "price": {
+        "amount": 152484,
+        "currency": "KZT"
+      },
+      "refundable": false,
+      "baggage": null,
+      "cabin": "Economy",
+      "airline": {
+        "code": "KC",
+        "name": "Air Astana",
+        "logo": {
+          "url": "https://avia-api.k8s-test.aviata.team/img/3093-fe65813d49024ba21b9ac7e21781fad5.svg",
+          "width": null,
+          "height": null
+        }
+      },
+      "passengers": {
+        "ADT": 2,
+        "CHD": 1,
+        "INF": 0
+      },
+      "type": "RT"
+    }
+  ]
+}

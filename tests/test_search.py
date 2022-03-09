@@ -1,42 +1,24 @@
 import json
-
 import pytest
+from utils import load_data
 
-from code.services import validator
 
-
-@pytest.mark.parametrize('args, expected_status', [
-    ('', 422),
-    (json.dumps({
-        "cabin": "Eco",
-        "origin": "ALA",
-        "destination": "NQZ",
-        "dep_at": "2022-03-27",
-        "arr_at": "2022-03-28",
-        "adults": 1,
-        "children": 0,
-        "infants": 0,
-        "currency": "KZT"}), 422),
+@pytest.mark.parametrize('scenario, http_status', [
+    ('ow_1adt', 200),
+    ('rt_2adt_1_chd', 200),
+    ('wrong_search_payload', 422),
 ])
-async def test_search_status_fail_async(app, args, expected_status):
-    request, response = await app.asgi_client.post('/search', data=args)
+async def test_search(mocker, app, scenario, http_status, fake_uuid):
+    request_json = load_data(f'tests/data/search/{scenario}_request.json')
+    expected_json_result = json.loads(load_data(f'tests/data/search/{scenario}_response.json'))
+    provider_result = load_data(f'tests/data/search/{scenario}_provider_response.json')
 
-    assert request.method == 'POST'
-    assert response.status == expected_status
+    mocker.patch('code.services.http_client.search_in_provider', return_value=provider_result)
+    mocker.patch('uuid.uuid4', return_value=fake_uuid)
 
+    request, response = await app.asgi_client.post('/search', data=request_json)
+    response_json = response.json
 
-async def test_search_with_mock_ok(app, fake_search_body, search_response, fake_uuid):
+    assert response_json == expected_json_result
+    assert response.status == http_status
 
-    request, response = await app.asgi_client.post('/search', data=json.dumps(fake_search_body))
-
-    assert request.method == 'POST'
-    assert response.status == 200
-    assert validator.is_valid_uuid(response.json.get('id'))
-
-# def test_search_with_mock_fail(app, mocker):
-#     mocker.patch('uuid.uuid4', side_effect=Exception)
-#
-#     request, response = app.test_client.post('/search')
-#
-#     assert request.method == 'POST'
-#     assert response.status == 500

@@ -1,35 +1,24 @@
 import json
-
-from pytest import fixture
-
-
-@fixture()
-def fake_booking_body():
-    b = {
-        "offer_id": "123",
-        "phone": "+77777777777",
-        "email": "user@example.com",
-        "passengers": [
-            {
-                "gender": "M",
-                "type": "ADT",
-                "first_name": "Craig",
-                "last_name": "Bensen",
-                "date_of_birth": "1985-08-24",
-                "citizenship": "US",
-                "document": {
-                    "number": "N2343545634",
-                    "expires_at": "2025-08-24",
-                    "iin": "123456789123"
-                }
-            }
-        ]
-    }
-    return json.dumps(b)
+from unittest.mock import AsyncMock
+import pytest
+from utils import load_data
 
 
-async def test_booking_status_fail_async(app, fake_booking_body):
-    request, response = await app.asgi_client.post('/booking', data=fake_booking_body)
+@pytest.mark.parametrize('scenario, http_status', [
+    ('valid', 200),
+    ('invalid', 422)
+])
+async def test_booking(mocker, app, scenario, http_status):
+    request_json = load_data(f'tests/data/booking/{scenario}_request.json')
+    expected_json_result = json.loads(load_data(f'tests/data/booking/{scenario}_response.json'))
+    if http_client_result := load_data(f'tests/data/booking/{scenario}_http_client_response.json'):
+        http_client_result = json.loads(load_data(f'tests/data/booking/{scenario}_http_client_response.json'))
+        mocker.patch('code.services.http_client.booking', return_value=http_client_result)
+    mocker.patch('code.services.database.insert_bookings', side_effect=AsyncMock(return_value=None))
 
-    assert request.method == 'POST'
-    assert response.status == 422
+    request, response = await app.asgi_client.post('/booking', data=request_json)
+    response_json = response.json
+
+    assert response_json == expected_json_result
+    assert response.status == http_status
+

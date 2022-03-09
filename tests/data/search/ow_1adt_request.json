@@ -1,0 +1,10 @@
+{
+        "cabin": "Economy",
+        "origin": "ALA",
+        "destination": "NQZ",
+        "dep_at": "2022-03-27",
+        "adults": 1,
+        "children": 0,
+        "infants": 0,
+        "currency": "KZT"
+}

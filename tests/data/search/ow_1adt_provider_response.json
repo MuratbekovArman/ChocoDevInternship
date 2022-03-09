@@ -1,0 +1,84 @@
+{
+  "search_id": "8538569061673192589",
+  "count": 1,
+  "items": [
+    {
+      "id": "64ff9199-4676-4632-bc67-b176106a45f8",
+      "flights": [
+        {
+          "duration": 21000,
+          "segments": [
+            {
+              "operating_airline": "Z9",
+              "flight_number": "791",
+              "equipment": "Boeing 737-900",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-22T03:05:00+06:00",
+                "airport": {
+                  "code": "ALA",
+                  "name": "Алматы"
+                },
+                "terminal": "5"
+              },
+              "arr": {
+                "at": "2022-03-22T07:30:00+06:00",
+                "airport": {
+                  "code": "UKK",
+                  "name": "Усть-Каменогорск"
+                },
+                "terminal": null
+              },
+              "baggage": "1PC"
+            },
+            {
+              "operating_airline": "Z9",
+              "flight_number": "547",
+              "equipment": "Boeing 777-300",
+              "cabin": "Economy",
+              "dep": {
+                "at": "2022-03-22T11:10:00+06:00",
+                "airport": {
+                  "code": "UKK",
+                  "name": "Усть-Каменогорск"
+                },
+                "terminal": "4"
+              },
+              "arr": {
+                "at": "2022-03-22T12:35:00+06:00",
+                "airport": {
+                  "code": "NQZ",
+                  "name": "Нур-Султан (Астана)"
+                },
+                "terminal": "1"
+              },
+              "baggage": "1PC"
+            }
+          ]
+        }
+      ],
+      "price": {
+        "amount": 60086,
+        "currency": "KZT"
+      },
+      "refundable": true,
+      "baggage": "1PC",
+      "cabin": "Economy",
+      "airline": {
+        "code": "Z9",
+        "name": "Bek Air",
+        "logo": {
+          "url": "https://avia-api.k8s-test.aviata.team/img/5615-ea5b517109ceed9197cad9ed19880b23.svg",
+          "width": null,
+          "height": null
+        }
+      },
+      "passengers": {
+        "ADT": 1,
+        "CHD": 0,
+        "INF": 0
+      },
+      "type": "OW"
+    }
+  ]
+}

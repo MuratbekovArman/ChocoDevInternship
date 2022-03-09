@@ -12,32 +12,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 @fixture
 def fake_uuid():
-    return '557d187d-6465-4850-b4ea-6121752614f8'
-
-
-@fixture()
-def fake_search_body():
-    return {
-        "cabin": "Economy",
-        "origin": "ALA",
-        "destination": "NQZ",
-        "dep_at": "2022-03-27",
-        "arr_at": "2022-03-28",
-        "adults": 1,
-        "children": 0,
-        "infants": 0,
-        "currency": "KZT"
-    }
-
-
-@fixture
-def search_response(fake_uuid):
-    return {'id': fake_uuid, 'status': 'pending', 'items': []}
-
-
-@fixture()
-def search_detail_response(fake_uuid):
-    return {'id': fake_uuid, 'status': 'DONE', 'items': []}
+    return 'ecfa5dfc-b44c-4576-a8f1-03ca50990879'
 
 
 @fixture

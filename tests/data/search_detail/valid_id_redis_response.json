@@ -1,0 +1,61 @@
+{
+    "search_id": "ecfa5dfc-b44c-4576-a8f1-03ca50990879",
+    "status": "DONE",
+    "items": [
+        {
+            "id": "53afe210-2ada-40dc-9e1c-d30d1872f2bb",
+            "flights": [
+                {
+                    "duration": 19500,
+                    "segments": [
+                        {
+                            "operating_airline": "IP",
+                            "flight_number": "964",
+                            "equipment": "Boeing 737-700",
+                            "cabin": "Economy",
+                            "dep": {
+                                "at": "2022-03-27T03:30:00+06:00",
+                                "airport": {
+                                    "code": "ALA",
+                                    "name": "Алматы"
+                                },
+                                "terminal": "7"
+                            },
+                            "arr": {
+                                "at": "2022-03-27T08:55:00+06:00",
+                                "airport": {
+                                    "code": "NQZ",
+                                    "name": "Нур-Султан (Астана)"
+                                },
+                                "terminal": "6"
+                            },
+                            "baggage": null
+                        }
+                    ]
+                }
+            ],
+            "price": {
+                "amount": 23257,
+                "currency": "KZT"
+            },
+            "refundable": false,
+            "baggage": null,
+            "cabin": "Economy",
+            "airline": {
+                "code": "IP",
+                "name": "Atyrau Aue Zholy",
+                "logo": {
+                    "url": "https://avia-api.k8s-test.aviata.team/img/2709-493e616c4f2455a0e9abda68b529ea61.jpeg",
+                    "width": 82,
+                    "height": 82
+                }
+            },
+            "passengers": {
+                "ADT": 1,
+                "CHD": 0,
+                "INF": 0
+            },
+            "type": "OW"
+        }
+    ]
+}

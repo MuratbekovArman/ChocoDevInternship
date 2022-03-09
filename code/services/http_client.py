@@ -1,4 +1,3 @@
-import asyncio
 import json
 from datetime import date
 
@@ -14,12 +13,6 @@ headers = {'content-type': 'application/json',
 timeout = aiohttp.ClientTimeout(total=30)
 amadeus = 'Amadeus'
 sabre = 'Sabre'
-
-
-async def search(body):
-    search_results = await asyncio.gather(search_in_provider(amadeus, body),
-                                          search_in_provider(sabre, body))
-    return search_results
 
 
 async def search_in_provider(provider, search_body, redis, id):

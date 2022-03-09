@@ -1,0 +1,128 @@
+{
+    "id": "d73bac2a-33c2-48d5-8ab3-ce264c31bd7e",
+    "pnr": "LDJ29N",
+    "expires_at": "2022-03-09T19:33:55.677678+06:00",
+    "phone": "+77777777776",
+    "email": "user@example.com",
+    "offer": {
+        "id": "aa5c8b50-0b20-4499-845f-b94e184e5aea",
+        "flights": [
+            {
+                "duration": 18600,
+                "segments": [
+                    {
+                        "operating_airline": "Z9",
+                        "flight_number": "976",
+                        "equipment": "Boeing 737-300 with winglets",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-27T03:15:00+06:00",
+                            "airport": {
+                                "code": "ALA",
+                                "name": "Алматы"
+                            },
+                            "terminal": "9"
+                        },
+                        "arr": {
+                            "at": "2022-03-27T06:05:00+06:00",
+                            "airport": {
+                                "code": "PWQ",
+                                "name": "Павлодар"
+                            },
+                            "terminal": "3"
+                        },
+                        "baggage": "20KG"
+                    },
+                    {
+                        "operating_airline": "Z9",
+                        "flight_number": "792",
+                        "equipment": "Boeing 757 Mixed",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-27T09:35:00+06:00",
+                            "airport": {
+                                "code": "PWQ",
+                                "name": "Павлодар"
+                            },
+                            "terminal": "6"
+                        },
+                        "arr": {
+                            "at": "2022-03-27T11:55:00+06:00",
+                            "airport": {
+                                "code": "NQZ",
+                                "name": "Нур-Султан (Астана)"
+                            },
+                            "terminal": "1"
+                        },
+                        "baggage": "20KG"
+                    }
+                ]
+            },
+            {
+                "duration": 10800,
+                "segments": [
+                    {
+                        "operating_airline": "Z9",
+                        "flight_number": "928",
+                        "equipment": "Boeing 727",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-28T03:25:00+06:00",
+                            "airport": {
+                                "code": "NQZ",
+                                "name": "Нур-Султан (Астана)"
+                            },
+                            "terminal": "1"
+                        },
+                        "arr": {
+                            "at": "2022-03-28T06:25:00+06:00",
+                            "airport": {
+                                "code": "ALA",
+                                "name": "Алматы"
+                            },
+                            "terminal": "1"
+                        },
+                        "baggage": "20KG"
+                    }
+                ]
+            }
+        ],
+        "price": {
+            "amount": 100899,
+            "currency": "KZT"
+        },
+        "refundable": true,
+        "baggage": "20KG",
+        "cabin": "Economy",
+        "airline": {
+            "code": "Z9",
+            "name": "Bek Air",
+            "logo": {
+                "url": "https://avia-api.k8s-test.aviata.team/img/5615-ea5b517109ceed9197cad9ed19880b23.svg",
+                "width": null,
+                "height": null
+            }
+        },
+        "passengers": {
+            "ADT": 1,
+            "CHD": 0,
+            "INF": 0
+        },
+        "type": "RT"
+    },
+    "passengers": [
+        {
+            "gender": "M",
+            "type": "ADT",
+            "first_name": "Craig",
+            "last_name": "Bensen",
+            "date_of_birth": "1985-08-24",
+            "citizenship": "US",
+            "document": {
+                "number": "N2343545634",
+                "expires_at": "2025-08-24",
+                "iin": "123456789123"
+            }
+        }
+    ]
+}

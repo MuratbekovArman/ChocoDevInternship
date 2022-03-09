@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, date, timedelta
 from sanic.exceptions import NotFound, ServerError
 from sanic_scheduler import SanicScheduler, task
-from .exceptions import ValidationError
+from .exceptions import ValidationError, NotFoundError
 from sanic import Sanic, response
 from .services import http_client, database, validator
 from . import settings
@@ -16,6 +16,22 @@ scheduler = SanicScheduler(app)
 
 amadeus = 'Amadeus'
 sabre = 'Sabre'
+
+
+@app.get('/health')
+async def health(request):
+    db = request.app.ctx.db_pool
+    redis = request.app.ctx.redis
+
+    db_health = await database.health(db)
+    if redis_health := await redis.client():
+        redis_health = {'status': 'available'}
+    else:
+        redis_health = {'status': 'unavailable'}
+    return response.json({
+        'db_health': db_health,
+        'redis_health': redis_health
+    })
 
 
 @app.post('/search')
@@ -34,7 +50,7 @@ async def search(request):
     raise ValidationError('Missing body of the request!')
 
 
-@app.get('/search/<search_id>')
+@app.get('/search/<search_id>', error_format="json")
 async def search_details(request, search_id):
     redis = request.app.ctx.redis
     if validator.is_valid_uuid(search_id):
@@ -43,7 +59,7 @@ async def search_details(request, search_id):
             search_results['items'] = json.loads(search_results['items'])
             return response.json(search_results)
 
-        raise NotFound('Search items not found!')
+        raise NotFoundError('Search items not found!')
     raise ValidationError('Search_id is invalid!')
 
 
@@ -84,7 +100,7 @@ async def booking(request):
         raise ValidationError('Incorrect information passed!')
 
 
-@app.get('/booking/<booking_id>')
+@app.get('/booking/<booking_id>', error_format="json")
 async def booking_detail(request, booking_id):
     db_pool = request.app.ctx.db_pool
     if result := await database.get_booking(db_pool, booking_id):
