@@ -21,4 +21,3 @@ async def test_search(mocker, app, scenario, http_status, fake_uuid):
 
     assert response_json == expected_json_result
     assert response.status == http_status
-

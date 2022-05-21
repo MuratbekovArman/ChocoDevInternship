@@ -17,14 +17,14 @@ sabre = 'Sabre'
 
 async def search_in_provider(provider, search_body, redis, id):
     body = {'provider': provider, **search_body}
-    async with aiohttp.ClientSession(f'{URL}', timeout=timeout) as session:
+    async with aiohttp.ClientSession(URL, timeout=timeout) as session:
         async with session.post('/offers/search', json=body, headers=headers) as response:
             search_in_provider_results = await response.json()
 
             search_currency = body.get('currency')
             rates = await redis.get(f'currency_rates:{date.today().isoformat()}')
 
-            search_in_provider_results['items'] = __change_currencies(
+            search_in_provider_results['items'] = _change_currencies(
                 search_in_provider_results.get('items'),
                 rates, search_currency)
 
@@ -59,9 +59,9 @@ async def get_rates():
             return rates
 
 
-def __change_currencies(items, rates, search_currency):
+def _change_currencies(offers, rates, search_currency):
     rates = json.loads(rates)
-    for item in items:
+    for item in offers:
         item_cur = item['price']['currency']
         item_amount = item['price']['amount']
         if item_cur != search_currency:
@@ -74,4 +74,4 @@ def __change_currencies(items, rates, search_currency):
                 item['price']['amount'] = round((item_amount * float(rates.get(item_cur)))
                                                 / float(rates.get(search_currency)))
             item['price']['currency'] = search_currency
-    return items
+    return offers
